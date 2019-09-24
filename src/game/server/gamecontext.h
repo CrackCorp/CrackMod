@@ -184,6 +184,12 @@ public:
 	virtual const char *NetVersion() const;
 	virtual const char *NetVersionHashUsed() const;
 	virtual const char *NetVersionHashReal() const;
+
+	// CrackMod
+
+	virtual const char *CrackVersion() const;
+
+	void OnCrackClientEnter(int ClientID);
 };
 
 inline int64 CmaskAll() { return -1; }

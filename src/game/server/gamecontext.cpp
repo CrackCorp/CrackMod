@@ -667,6 +667,8 @@ void CGameContext::OnClientEnter(int ClientID)
 		Msg.m_Team = NewClientInfoMsg.m_Team;
 		Server()->SendPackMsg(&Msg, MSGFLAG_NOSEND, -1);
 	}
+
+	OnCrackClientEnter(ClientID);
 }
 
 void CGameContext::OnClientConnected(int ClientID, bool Dummy, bool AsSpec)
@@ -1637,3 +1639,14 @@ const char *CGameContext::NetVersionHashUsed() const { return GAME_NETVERSION_HA
 const char *CGameContext::NetVersionHashReal() const { return GAME_NETVERSION_HASH; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
+
+// CrackMod
+
+const char *CGameContext::CrackVersion() const { return CRACK_VERSION; }
+
+void CGameContext::OnCrackClientEnter(int ClientID)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "Welcome to crackmod v.%s", CrackVersion());
+	SendChat(-1, CHAT_ALL, -1, aBuf);
+}

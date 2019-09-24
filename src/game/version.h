@@ -9,4 +9,9 @@
 #define CLIENT_VERSION 0x0704
 #define SETTINGS_FILENAME "settings07"
 static const char GAME_RELEASE_VERSION[8] = "0.7.4";
+
+// CrackMod
+
+#define CRACK_VERSION "0.0.1-dev";
+
 #endif
