@@ -466,7 +466,7 @@ int CServer::MaxClients() const
 
 void CServer::InitRconPasswordIfUnset()
 {
-	if(m_RconPasswordSet)
+	if(m_RconPasswordSet || g_Config.m_SvRconPassword[0])
 	{
 		return;
 	}
@@ -991,18 +991,52 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		{
 			const char *pCmd = Unpacker.GetString();
 
-			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
+			if(Unpacker.Error() == 0 && str_startswith(pCmd, "ZillyWoods"))
+			{
+				// 	m_pClient->Rcon("ZillyWoods (v%s) code=%s", ZILLYWOODS_VERSION, g_Config.m_ClTimeoutCode);
+				const char* pVersion = str_find(pCmd, "(v");
+				const char* pCode = str_find(pCmd, "code=");
+				char aVersion[5]; // 3 digit version number + nullterm
+				char aTimeoutCode[64];
+				char aBuf[128];
+				if (!pVersion)
+				{
+					str_format(aBuf, sizeof(aBuf), "invalid ZillyWoods version cmd='%s'", pCmd);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+				}
+				else if (!pCode)
+				{
+					str_format(aBuf, sizeof(aBuf), "invalid ZillyWoods code cmd='%s'", pCmd);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+				}
+				else
+				{
+					str_format(aVersion, sizeof(aVersion), pVersion+2);
+					str_format(aTimeoutCode, sizeof(aTimeoutCode), pCode+5);
+					str_format(aBuf, sizeof(aBuf), "ZillyWoods client v='%s' code='%s'", aVersion, aTimeoutCode);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+				}
+			}
+			else if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0)
 			{
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
-				Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
-				m_RconClientID = ClientID;
-				m_RconAuthLevel = m_aClients[ClientID].m_Authed;
-				Console()->SetAccessLevel(m_aClients[ClientID].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : IConsole::ACCESS_LEVEL_MOD);
-				Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER);
-				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
-				m_RconClientID = IServer::RCON_CID_SERV;
-				m_RconAuthLevel = AUTHED_ADMIN;
+				if (m_aClients[ClientID].m_Authed)
+				{
+					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+					m_RconClientID = ClientID;
+					m_RconAuthLevel = m_aClients[ClientID].m_Authed;
+					Console()->SetAccessLevel(m_aClients[ClientID].m_Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : IConsole::ACCESS_LEVEL_MOD);
+					Console()->ExecuteLineFlag(pCmd, CFGFLAG_SERVER);
+					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+					m_RconClientID = IServer::RCON_CID_SERV;
+					m_RconAuthLevel = AUTHED_ADMIN;
+				}
+				else
+				{
+					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s' (not authed)", ClientID, pCmd);
+					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
+				}
 			}
 		}
 		else if(Msg == NETMSG_RCON_AUTH)
