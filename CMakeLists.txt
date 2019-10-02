@@ -84,13 +84,9 @@ option(DEV "Don't generate stuff necessary for packaging" OFF)
 
 set(OpenGL_GL_PREFERENCE LEGACY)
 
-# Set the default build type to Release
+# Set the default build type to Debug
 if(NOT(CMAKE_BUILD_TYPE))
-  if(NOT(DEV))
-    set(CMAKE_BUILD_TYPE Release)
-  else()
     set(CMAKE_BUILD_TYPE Debug)
-  endif()
 endif()
 
 set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
