@@ -96,6 +96,8 @@ public:
 			STATE_READY,
 			STATE_INGAME,
 
+			STATE_BOT,
+
 			SNAPRATE_INIT=0,
 			SNAPRATE_FULL,
 			SNAPRATE_RECOVER
@@ -281,6 +283,11 @@ public:
 	virtual void SnapFreeID(int ID);
 	virtual void *SnapNewItem(int Type, int ID, int Size);
 	void SnapSetStaticsize(int ItemType, int Size);
+
+	// CrackMod
+
+	void BotJoin(int BotID);
+	void BotLeave(int BotID, bool Silent = false);
 };
 
 #endif

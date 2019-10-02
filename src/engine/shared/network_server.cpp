@@ -311,3 +311,16 @@ void CNetServer::SetMaxClientsPerIP(int Max)
 
 	m_MaxClientsPerIP = Max;
 }
+
+
+// CrackMod
+
+void CNetServer::BotInit(int BotID)
+{
+	m_aSlots[BotID].m_Connection.BotConnect();
+}
+
+void CNetServer::BotDelete(int BotID)
+{
+	m_aSlots[BotID].m_Connection.BotDrop();
+}

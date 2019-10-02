@@ -435,3 +435,16 @@ int CNetConnection::Update()
 
 	return 0;
 }
+
+
+// CrackMod
+
+void CNetConnection::BotConnect()
+{
+	m_State = NET_CONNSTATE_BOT;
+}
+
+void CNetConnection::BotDrop()
+{
+	m_State = NET_CONNSTATE_OFFLINE;
+}

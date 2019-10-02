@@ -119,6 +119,8 @@ enum
 	NET_CONNSTATE_ONLINE=4,
 	NET_CONNSTATE_ERROR=5,
 
+	NET_CONNSTATE_BOT=6,
+
 	NET_CHUNKFLAG_VITAL=1,
 	NET_CHUNKFLAG_RESEND=2,
 
@@ -350,6 +352,11 @@ public:
 	int64 ConnectTime() const { return m_LastUpdateTime; }
 
 	int AckSequence() const { return m_Ack; }
+
+	// CrackMod
+
+	void BotConnect();
+	void BotDrop();
 };
 
 class CConsoleNetConnection
@@ -450,6 +457,11 @@ public:
 
 	//
 	void SetMaxClientsPerIP(int Max);
+
+	// CrackMod
+
+	void BotInit(int BotID);
+	void BotDelete(int BotID);
 };
 
 class CNetConsole

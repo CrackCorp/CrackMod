@@ -68,6 +68,11 @@ public:
 
 	virtual void DemoRecorder_HandleAutoStart() = 0;
 	virtual bool DemoRecorder_IsRecording() = 0;
+
+	// CrackMod
+
+	virtual void BotJoin(int BotID) = 0;
+	virtual void BotLeave(int BotID, bool silet = false) = 0;
 };
 
 class IGameServer : public IInterface

@@ -64,6 +64,10 @@ class CGameContext : public IGameServer
 	static void ConchainSettingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
+	// CrackMod
+
+	static void ConDummy(IConsole::IResult *pResult, void *pUserData);
+
 	CGameContext(int Resetting);
 	void Construct(int Resetting);
 
@@ -190,6 +194,8 @@ public:
 	virtual const char *CrackVersion() const;
 
 	void OnCrackClientEnter(int ClientID);
+	int GetNextClientID();
+	void CreateNewDummys(int Number);
 };
 
 inline int64 CmaskAll() { return -1; }

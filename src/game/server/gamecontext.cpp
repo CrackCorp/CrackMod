@@ -1508,6 +1508,10 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("remove_vote", "s", CFGFLAG_SERVER, ConRemoveVote, this, "remove a voting option");
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
 	Console()->Register("vote", "r", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
+
+	// CrackMod
+
+	Console()->Register("dummy", "?i", CFGFLAG_SERVER|CFGFLAG_STORE, ConDummy, this, "connect crack dummys");
 }
 
 void CGameContext::OnInit()
@@ -1653,4 +1657,37 @@ void CGameContext::OnCrackClientEnter(int ClientID)
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Welcome to crackmod v.%s", CrackVersion());
 	SendChat(-1, CHAT_ALL, -1, aBuf);
+}
+
+void CGameContext::ConDummy(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->CreateNewDummys(pResult->NumArguments() ? pResult->GetInteger(0) : 0);
+}
+
+int CGameContext::GetNextClientID()
+{
+	int ClientID = -1;
+	for (int i = 0; i < g_Config.m_SvMaxClients; i++)
+	{
+		if (m_apPlayers[i])
+			continue;
+
+		ClientID = i;
+		break;
+	}
+	return ClientID;
+}
+
+void CGameContext::CreateNewDummys(int Number)
+{
+	// dbg version
+	for (int i = 0; i < Number; i++)
+		OnClientConnected(GetNextClientID(), true, false);
+	/*
+	int DummyID = GetNextClientID();
+	m_apPlayers[DummyID] = new(DummyID) CPlayer(this, DummyID, TEAM_RED);
+	Server()->BotJoin(DummyID);
+	OnClientEnter(DummyID);
+	*/
 }
