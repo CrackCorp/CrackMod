@@ -5,6 +5,10 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include <engine/external/md5/md5.h>
+
+#include <engine/shared/config.h>
+
 #include "network.h"
 
 static unsigned int Hash(char *pData, int Size)
@@ -37,27 +41,49 @@ int CNetTokenManager::ProcessMessage(const NETADDR *pAddr, const CNetPacketConst
 	bool BroadcastResponse = false;
 	if(pPacket->m_Token != NET_TOKEN_NONE
 		&& !CheckToken(pAddr, pPacket->m_Token, pPacket->m_ResponseToken, &BroadcastResponse))
+	{
+		if (g_Config.m_SvVerboseNet)
+			dbg_msg("process_msg", "wrong token=%d responsetoken=%d", pPacket->m_Token, pPacket->m_ResponseToken);
 		return 0; // wrong token, silent ignore
+	}
 
 	bool Verified = pPacket->m_Token != NET_TOKEN_NONE;
 	bool TokenMessage = (pPacket->m_Flags & NET_PACKETFLAG_CONTROL)
 		&& pPacket->m_aChunkData[0] == NET_CTRLMSG_TOKEN;
 
 	if(pPacket->m_Flags&NET_PACKETFLAG_CONNLESS)
+	{
+		if (g_Config.m_SvVerboseNet)
+			dbg_msg("process_msg", "dropping connless packet without token");
 		return (Verified && !BroadcastResponse) ? 1 : 0; // connless packets without token are not allowed
+	}
 
 	if(!TokenMessage)
 	{
 		if(Verified && !BroadcastResponse)
+		{
+			if (g_Config.m_SvVerboseNet)
+			{
+				dbg_msg("process_msg", "verified packet");
+			}
 			return 1; // verified packet
+		}
 		else
+		{
+			if (g_Config.m_SvVerboseNet)
+				dbg_msg("process_msg", "abort: only NET_CTRLMSG_TOKEN is allowed connless");
 			// the only allowed not connless packet
 			// without token is NET_CTRLMSG_TOKEN
 			return 0;
+		}
 	}
 
 	if(Verified && TokenMessage)
+	{
+		if (g_Config.m_SvVerboseNet)
+			dbg_msg("process_msg", "token exchange complete");
 		return BroadcastResponse ? -1 : 1; // everything is fine, token exchange complete
+	}
 
 	// client requesting token
 	if(pPacket->m_DataSize >= NET_TOKENREQUEST_DATASIZE)
@@ -66,6 +92,8 @@ int CNetTokenManager::ProcessMessage(const NETADDR *pAddr, const CNetPacketConst
 			pPacket->m_ResponseToken, 0, NET_CTRLMSG_TOKEN,
 			GenerateToken(pAddr), false);
 	}
+	if (g_Config.m_SvVerboseNet)
+		dbg_msg("process_msg", "no need to process NET_CTRLMSG_TOKEN further");
 	return 0; // no need to process NET_CTRLMSG_TOKEN further
 }
 

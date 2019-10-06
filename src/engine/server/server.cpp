@@ -900,6 +900,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_READY)
 		{
+			if (g_Config.m_SvVerboseNet)
+				dbg_msg("client_pck", "Msg=READY");
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_CONNECTING || m_aClients[ClientID].m_State == CClient::STATE_CONNECTING_AS_SPEC))
 			{
 				char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -917,6 +919,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_ENTERGAME)
 		{
+			if (g_Config.m_SvVerboseNet)
+				dbg_msg("client_pck", "Msg=ENTERGAME");
 			if((pPacket->m_Flags&NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State == CClient::STATE_READY && GameServer()->IsClientReady(ClientID))
 			{
 				char aAddrStr[NETADDR_MAXSTRSIZE];
@@ -1235,7 +1239,11 @@ void CServer::PumpNetwork()
 				Unpacker.Reset((unsigned char*)Packet.m_pData+sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize-sizeof(SERVERBROWSE_GETINFO));
 				int SrvBrwsToken = Unpacker.GetInt();
 				if(Unpacker.Error())
+				{
+					if (g_Config.m_SvVerboseNet)
+						dbg_msg("pump_network", "unpack error");
 					continue;
+				}
 
 				CPacker Packer;
 				CNetChunk Response;
