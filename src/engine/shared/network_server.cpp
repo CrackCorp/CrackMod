@@ -4,6 +4,11 @@
 
 #include <engine/console.h>
 
+#include <engine/shared/config.h>
+
+#include <engine/server/register.h>
+
+
 #include "netban.h"
 #include "network.h"
 
@@ -57,13 +62,10 @@ int CNetServer::Close()
 int CNetServer::Drop(int ClientID, const char *pReason)
 {
 	// TODO: insert lots of checks here
-	/*NETADDR Addr = ClientAddr(ClientID);
-
-	dbg_msg("net_server", "client dropped. cid=%d ip=%d.%d.%d.%d reason=\"%s\"",
-		ClientID,
-		Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3],
-		pReason
-		);*/
+	char aAddrStr[NETADDR_MAXSTRSIZE];
+	net_addr_str(ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
+	if (g_Config.m_SvVerboseNet)
+		dbg_msg("server", "client dropped. cid=%d addr=%s reason='%s'", ClientID, aAddrStr, pReason);
 	if(m_pfnDelClient)
 		m_pfnDelClient(ClientID, pReason, m_UserPtr);
 
@@ -80,6 +82,8 @@ int CNetServer::Update()
 		m_aSlots[i].m_Connection.Update();
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ERROR)
 		{
+			if(g_Config.m_SvVerboseNet)
+				dbg_msg("update", "network error ID=%d", i);
 			if(Now - m_aSlots[i].m_Connection.ConnectTime() < time_freq() && NetBan())
 			{
 				if(NetBan()->BanAddr(ClientAddr(i), 60, "Stressing network") == -1)
@@ -107,7 +111,11 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 
 		// check for a chunk
 		if(m_RecvUnpacker.FetchChunk(pChunk))
+		{
+			if(g_Config.m_SvVerboseNet)
+				dbg_msg("recv", "no chunk found");
 			return 1;
+		}
 
 		// TODO: empty the recvinfo
 		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE);
@@ -115,6 +123,28 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 		// no more packets for now
 		if(Bytes <= 0)
 			break;
+
+		if (g_Config.m_SvVerboseNet > 1)
+		{
+			// 51.255.129.49 master3
+			// 51.89.37.201 master2
+			// 164.132.193.153 master status.tw
+			if (
+				(Addr.ip[0] == 51 && Addr.ip[1] == 255 && Addr.ip[2] == 129 && Addr.ip[3] == 49) ||
+				(Addr.ip[0] == 51 && Addr.ip[1] == 89 && Addr.ip[2] == 37 && Addr.ip[3] == 201) ||
+				(Addr.ip[0] == 164 && Addr.ip[1] == 132 && Addr.ip[2] == 193 && Addr.ip[3] == 153)
+				)
+			{
+				dbg_msg("recv", "data from master srv");
+			}
+			else
+			{
+				if (g_Config.m_SvVerboseNet)
+					dbg_msg("recv", "client dropped. ip=%d.%d.%d.%d token=%ud",
+					Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3],
+					*pResponseToken);
+			}
+		}
 
 		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data) == 0)
 		{

@@ -43,7 +43,7 @@ int CNetTokenManager::ProcessMessage(const NETADDR *pAddr, const CNetPacketConst
 		&& !CheckToken(pAddr, pPacket->m_Token, pPacket->m_ResponseToken, &BroadcastResponse))
 	{
 		if (g_Config.m_SvVerboseNet)
-			dbg_msg("process_msg", "wrong token=%d responsetoken=%d", pPacket->m_Token, pPacket->m_ResponseToken);
+			dbg_msg("process_msg", "wrong token=%d responsetoken=%d ip=%d.%d.%d.%d", pPacket->m_Token, pPacket->m_ResponseToken, pAddr->ip[0], pAddr->ip[1], pAddr->ip[2], pAddr->ip[3]);
 		return 0; // wrong token, silent ignore
 	}
 

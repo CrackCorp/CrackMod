@@ -248,14 +248,22 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 	int64 Now = time_get();
 
 	if(pPacket->m_Token == NET_TOKEN_NONE || pPacket->m_Token != m_Token)
+	{
+		if (g_Config.m_SvVerboseNet)
+			dbg_msg("feed", "invalid token=%d expected=%d", pPacket->m_Token, m_Token);
 		return 0;
+	}
 
 	// check if resend is requested
 	if(pPacket->m_Flags&NET_PACKETFLAG_RESEND)
 		Resend();
 
 	if(pPacket->m_Flags&NET_PACKETFLAG_CONNLESS)
+	{
+		if (g_Config.m_SvVerboseNet)
+			dbg_msg("feed", "connless");
 		return 1;
+	}
 
 	//
 	if(pPacket->m_Flags&NET_PACKETFLAG_CONTROL)
@@ -284,9 +292,11 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 				{
 					// set the error string
 					SetError(Str);
+					if (g_Config.m_SvVerboseNet)
+						dbg_msg("feed", "close err=%s", Str);
 				}
 
-				if(g_Config.m_Debug)
+				if(g_Config.m_Debug || g_Config.m_SvVerboseNet)
 					dbg_msg("conn", "closed reason='%s'", Str);
 			}
 			return 0;
@@ -304,7 +314,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 					SendControlWithToken(NET_CTRLMSG_CONNECT);
 					dbg_msg("connection", "got token, replying, token=%x mytoken=%x", m_PeerToken, m_Token);
 				}
-				else if(g_Config.m_Debug)
+				else if(g_Config.m_Debug || g_Config.m_SvVerboseNet)
 					dbg_msg("connection", "got token, token=%x", m_PeerToken);
 			}
 			else
@@ -325,7 +335,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 						m_LastRecvTime = Now;
 						m_LastUpdateTime = Now;
 						SendControl(NET_CTRLMSG_CONNECTACCEPT, 0, 0);
-						if(g_Config.m_Debug)
+						if(g_Config.m_Debug || g_Config.m_SvVerboseNet)
 							dbg_msg("connection", "got connection, sending connect+accept");
 					}
 				}
@@ -337,7 +347,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 						m_LastRecvTime = Now;
 						SendControl(NET_CTRLMSG_ACCEPT, 0, 0);
 						m_State = NET_CONNSTATE_ONLINE;
-						if(g_Config.m_Debug)
+						if(g_Config.m_Debug || g_Config.m_SvVerboseNet)
 							dbg_msg("connection", "got connect+accept, sending accept. connection online");
 					}
 				}
@@ -350,7 +360,7 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr)
 		{
 			m_LastRecvTime = Now;
 			m_State = NET_CONNSTATE_ONLINE;
-			if(g_Config.m_Debug)
+			if(g_Config.m_Debug || g_Config.m_SvVerboseNet)
 				dbg_msg("connection", "connecting online");
 		}
 	}
@@ -410,7 +420,7 @@ int CNetConnection::Update()
 		if(time_get()-m_LastSendTime > time_freq()/2) // flush connection after 500ms if needed
 		{
 			int NumFlushedChunks = Flush();
-			if(NumFlushedChunks && g_Config.m_Debug)
+			if(NumFlushedChunks && (g_Config.m_Debug || g_Config.m_SvVerboseNet))
 				dbg_msg("connection", "flushed connection due to timeout. %d chunks.", NumFlushedChunks);
 		}
 
