@@ -64,10 +64,12 @@ class CServer : public IServer
 	class IGameServer *m_pGameServer;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
+	class IMasterServer * m_pMasterServer;
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class IConsole *Console() { return m_pConsole; }
 	class IStorage *Storage() { return m_pStorage; }
+	class IMasterServer *MasterServer() { return m_pMasterServer; }
 
 	enum
 	{
@@ -198,7 +200,7 @@ public:
 	CRegister m_Register;
 	CMapChecker m_MapChecker;
 
-	CServer();
+	CServer(IMasterServer *pMaster);
 
 	virtual void SetClientName(int ClientID, const char *pName);
 	virtual void SetClientClan(int ClientID, char const *pClan);

@@ -15,8 +15,11 @@
 
 bool CNetServer::Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP, int Flags)
 {
+	IMasterServer *pM = m_pMasterServer;
 	// zero out the whole structure
-	mem_zero(this, sizeof(*this));
+	mem_zero(this, sizeof(*this)); // Crackers hate this line wtf?!
+
+	m_pMasterServer = pM;
 
 	// open socket
 	m_Socket = net_udp_create(BindAddr, 0);
@@ -129,6 +132,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 			// 51.255.129.49 master3
 			// 51.89.37.201 master2
 			// 164.132.193.153 master status.tw
+			/*
 			if (
 				(Addr.ip[0] == 51 && Addr.ip[1] == 255 && Addr.ip[2] == 129 && Addr.ip[3] == 49) ||
 				(Addr.ip[0] == 51 && Addr.ip[1] == 89 && Addr.ip[2] == 37 && Addr.ip[3] == 201) ||
@@ -136,6 +140,14 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 				)
 			{
 				dbg_msg("recv", "data from master srv");
+			}
+			*/
+			if (m_pMasterServer->IsMasterSrv(&Addr))
+			{
+				if (g_Config.m_SvVerboseNet > 1)
+					dbg_msg("recv", "MASTERSERVER dropped. ip=%d.%d.%d.%d token=%ud",
+					Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3],
+					*pResponseToken);
 			}
 			else
 			{
@@ -344,6 +356,12 @@ void CNetServer::SetMaxClientsPerIP(int Max)
 
 
 // CrackMod
+
+CNetServer::CNetServer()
+{
+	// m_pMasterServer = 0;
+	// printf("CNetServer() mastersrv=%p netsrv=%p\n", m_pMasterServer, this);
+}
 
 void CNetServer::BotInit(int BotID)
 {

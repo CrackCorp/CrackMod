@@ -150,7 +150,7 @@ static int Run()
 
 int main(int argc, char **argv)
 {
-	pNet = new CNetServer;
+	pNet = new CNetServer();
 
 	while(argc)
 	{

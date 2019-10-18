@@ -206,6 +206,31 @@ public:
 		io_close(File);
 		return 0;
 	}
+
+	// CrackMod
+
+	virtual bool IsMasterSrv(NETADDR *pAddr)
+	{
+		for(int i = 0; i < MAX_MASTERSERVERS; i++)
+			// if (m_aMasterServers[i].m_Addr.ip == pAddr->ip) // arrays are pointer so this worn work :/
+			if (
+				pAddr->ip[0] == m_aMasterServers[i].m_Addr.ip[0] &&
+				pAddr->ip[1] == m_aMasterServers[i].m_Addr.ip[1] &&
+				pAddr->ip[2] == m_aMasterServers[i].m_Addr.ip[2] &&
+				pAddr->ip[3] == m_aMasterServers[i].m_Addr.ip[3]
+			)
+				return true;
+			/*
+			dbg_msg(
+				"crack",
+				"%d.%d.%d.%d cmp %d.%d.%d.%d ( %d cmp %d )",
+				pAddr->ip[0], pAddr->ip[1], pAddr->ip[2], pAddr->ip[3],
+				m_aMasterServers[i].m_Addr.ip[0], m_aMasterServers[i].m_Addr.ip[1], m_aMasterServers[i].m_Addr.ip[2], m_aMasterServers[i].m_Addr.ip[3],
+				pAddr->ip, m_aMasterServers[i].m_Addr.ip
+			);
+			*/
+		return false;
+	}
 };
 
 IEngineMasterServer *CreateEngineMasterServer() { return new CMasterServer; }

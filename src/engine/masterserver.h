@@ -26,6 +26,10 @@ public:
 	virtual NETADDR GetAddr(int Index) const= 0;
 	virtual const char *GetName(int Index) const = 0;
 	virtual bool IsValid(int Index) const = 0;
+
+	// CrackMod
+
+	virtual bool IsMasterSrv(NETADDR *pAddr) = 0;
 };
 
 class IEngineMasterServer : public IMasterServer

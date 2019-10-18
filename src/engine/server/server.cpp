@@ -268,11 +268,12 @@ void CServer::CClient::Reset()
 	m_MapChunk = 0;
 }
 
-CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
+CServer::CServer(IMasterServer *pMaster) : m_DemoRecorder(&m_SnapshotDelta)
 {
 	m_TickSpeed = SERVER_TICK_SPEED;
 
 	m_pGameServer = 0;
+	m_pMasterServer = 0;
 
 	m_CurrentGameTick = 0;
 	m_RunServer = 1;
@@ -291,6 +292,9 @@ CServer::CServer() : m_DemoRecorder(&m_SnapshotDelta)
 
 	m_RconPasswordSet = 0;
 	m_GeneratedRconPassword = 0;
+
+	// CrackMod
+	m_NetServer.m_pMasterServer = pMaster;
 
 	Init();
 }
@@ -1762,6 +1766,7 @@ void CServer::RegisterCommands()
 	m_pGameServer = Kernel()->RequestInterface<IGameServer>();
 	m_pMap = Kernel()->RequestInterface<IEngineMap>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
+	m_pMasterServer = Kernel()->RequestInterface<IMasterServer>();
 
 	// register console commands
 	Console()->Register("kick", "i?r", CFGFLAG_SERVER, ConKick, this, "Kick player with specified id for any reason");
@@ -1811,7 +1816,8 @@ void CServer::SnapSetStaticsize(int ItemType, int Size)
 	m_SnapshotDelta.SetStaticsize(ItemType, Size);
 }
 
-static CServer *CreateServer() { return new CServer(); }
+static CServer *CreateServer(IEngineMasterServer *pMaster) { return new CServer(pMaster); }
+
 
 int main(int argc, const char **argv) // ignore_convention
 {
@@ -1842,7 +1848,8 @@ int main(int argc, const char **argv) // ignore_convention
 		return -1;
 	}
 
-	CServer *pServer = CreateServer();
+	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
+	CServer *pServer = CreateServer(pEngineMasterServer);
 	IKernel *pKernel = IKernel::Create();
 
 	// create the components
@@ -1851,7 +1858,6 @@ int main(int argc, const char **argv) // ignore_convention
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IGameServer *pGameServer = CreateGameServer();
 	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER|CFGFLAG_ECON);
-	IEngineMasterServer *pEngineMasterServer = CreateEngineMasterServer();
 	IStorage *pStorage = CreateStorage("Teeworlds", IStorage::STORAGETYPE_SERVER, argc, argv); // ignore_convention
 	IConfig *pConfig = CreateConfig();
 

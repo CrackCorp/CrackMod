@@ -460,6 +460,9 @@ public:
 
 	// CrackMod
 
+	CNetServer();
+	class IMasterServer * m_pMasterServer;
+	class IMasterServer *MasterServer() { return m_pMasterServer; }
 	void BotInit(int BotID);
 	void BotDelete(int BotID);
 };
