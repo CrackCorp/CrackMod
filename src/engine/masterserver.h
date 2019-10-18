@@ -29,7 +29,7 @@ public:
 
 	// CrackMod
 
-	virtual bool IsMasterSrv(NETADDR *pAddr) = 0;
+	virtual bool IsMasterSrv(const NETADDR *pAddr) = 0;
 };
 
 class IEngineMasterServer : public IMasterServer

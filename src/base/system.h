@@ -1575,6 +1575,43 @@ int pid();
 */
 unsigned bytes_be_to_uint(const unsigned char *bytes);
 
+/*
+
+ %%% CrackMod %%%
+
+
+  ____                _    __  __           _ 
+ / ___|_ __ __ _  ___| | _|  \/  | ___   __| |
+| |   | '__/ _` |/ __| |/ / |\/| |/ _ \ / _` |
+| |___| | | (_| | (__|   <| |  | | (_) | (_| |
+ \____|_|  \__,_|\___|_|\_\_|  |_|\___/ \__,_|
+                                              
+
+ %%% CrackMod %%%
+
+*/
+
+
+/*
+	Function: filter_master
+
+	Prints a debug message.
+
+	Parameters:
+		master - A int 1=ismaster server 0=is not master server
+		verbose - A int representing net verbosity config
+		sys - A string that describes what system the message belongs to
+		fmt - A printf styled format string.
+
+	Remarks:
+		Does nothing in release version of the library.
+
+	See Also:
+		<dbg_assert>
+*/
+void filter_master(int master, int verbose, const char *sys, const char *fmt, ...);
+
+
 #ifdef __cplusplus
 }
 #endif

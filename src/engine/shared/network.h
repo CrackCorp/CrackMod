@@ -192,6 +192,8 @@ public:
 class CNetTokenManager
 {
 public:
+	class IMasterServer * m_pMasterServer;
+	class IMasterServer *MasterServer() { return m_pMasterServer; }
 	void Init(NETSOCKET Socket, int SeedTime = NET_SEEDTIME);
 	void Update();
 

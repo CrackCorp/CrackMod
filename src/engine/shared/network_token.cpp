@@ -9,6 +9,8 @@
 
 #include <engine/shared/config.h>
 
+#include <engine/server/register.h>
+
 #include "network.h"
 
 static unsigned int Hash(char *pData, int Size)
@@ -53,8 +55,13 @@ int CNetTokenManager::ProcessMessage(const NETADDR *pAddr, const CNetPacketConst
 
 	if(pPacket->m_Flags&NET_PACKETFLAG_CONNLESS)
 	{
-		if (g_Config.m_SvVerboseNet)
-			dbg_msg("process_msg", "dropping connless packet without token");
+		// TODO: pass m_pMasterServer early enough so no check is needed here
+		filter_master(
+			m_pMasterServer == NULL ? 0 : m_pMasterServer->IsMasterSrv(pAddr), g_Config.m_SvVerboseNet,
+			"process_msg",
+			"dropping connless packet without token ip=%d.%d.%d.%d",
+			pAddr->ip[0], pAddr->ip[1], pAddr->ip[2], pAddr->ip[3]
+		);
 		return (Verified && !BroadcastResponse) ? 1 : 0; // connless packets without token are not allowed
 	}
 
@@ -62,10 +69,11 @@ int CNetTokenManager::ProcessMessage(const NETADDR *pAddr, const CNetPacketConst
 	{
 		if(Verified && !BroadcastResponse)
 		{
-			if (g_Config.m_SvVerboseNet)
-			{
-				dbg_msg("process_msg", "verified packet");
-			}
+			filter_master(
+				m_pMasterServer == NULL ? 0 : m_pMasterServer->IsMasterSrv(pAddr), g_Config.m_SvVerboseNet,
+				"process_msg",
+				"verified packet"
+			);
 			return 1; // verified packet
 		}
 		else
@@ -80,8 +88,11 @@ int CNetTokenManager::ProcessMessage(const NETADDR *pAddr, const CNetPacketConst
 
 	if(Verified && TokenMessage)
 	{
-		if (g_Config.m_SvVerboseNet)
-			dbg_msg("process_msg", "token exchange complete");
+		filter_master(
+			m_pMasterServer == NULL ? 0 : m_pMasterServer->IsMasterSrv(pAddr), g_Config.m_SvVerboseNet,
+			"process_msg",
+			"token exchange complete"
+		);
 		return BroadcastResponse ? -1 : 1; // everything is fine, token exchange complete
 	}
 

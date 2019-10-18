@@ -2527,6 +2527,47 @@ unsigned bytes_be_to_uint(const unsigned char *bytes)
 	return (bytes[0]<<24) | (bytes[1]<<16) | (bytes[2]<<8) | bytes[3];
 }
 
+
+
+
+// CrackMod
+
+
+void filter_master(int master, int verbose, const char *sys, const char *fmt, ...)
+{
+	// printf("is master %d\n", master);
+	if (master && verbose < 2)
+		return;
+	va_list args;
+	char str[1024*4];
+	char *msg;
+	int i, len;
+
+	char timestr[80];
+	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
+
+	str_format(str, sizeof(str), "[%s][%s]: %s", timestr, sys, master == 1 ? "\x1B[95m[MASTERSRV]\033[0m " : "");
+
+	len = strlen(str);
+	msg = (char *)str + len;
+
+	va_start(args, fmt);
+#if defined(CONF_FAMILY_WINDOWS) && !defined(__GNUC__)
+	_vsprintf_p(msg, sizeof(str)-len, fmt, args);
+#else
+	vsnprintf(msg, sizeof(str)-len, fmt, args);
+#endif
+	va_end(args);
+
+	for(i = 0; i < num_loggers; i++)
+		loggers[i](str);
+}
+
+
+
+
+
+
 #if defined(__cplusplus)
 }
 #endif

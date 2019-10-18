@@ -209,7 +209,7 @@ public:
 
 	// CrackMod
 
-	virtual bool IsMasterSrv(NETADDR *pAddr)
+	virtual bool IsMasterSrv(const NETADDR *pAddr)
 	{
 		for(int i = 0; i < MAX_MASTERSERVERS; i++)
 			// if (m_aMasterServers[i].m_Addr.ip == pAddr->ip) // arrays are pointer so this worn work :/

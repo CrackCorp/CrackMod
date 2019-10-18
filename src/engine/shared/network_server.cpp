@@ -127,36 +127,26 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 		if(Bytes <= 0)
 			break;
 
-		if (g_Config.m_SvVerboseNet > 1)
+		// 51.255.129.49 master3
+		// 51.89.37.201 master2
+		// 164.132.193.153 master status.tw
+		/*
+		if (
+			(Addr.ip[0] == 51 && Addr.ip[1] == 255 && Addr.ip[2] == 129 && Addr.ip[3] == 49) ||
+			(Addr.ip[0] == 51 && Addr.ip[1] == 89 && Addr.ip[2] == 37 && Addr.ip[3] == 201) ||
+			(Addr.ip[0] == 164 && Addr.ip[1] == 132 && Addr.ip[2] == 193 && Addr.ip[3] == 153)
+			)
 		{
-			// 51.255.129.49 master3
-			// 51.89.37.201 master2
-			// 164.132.193.153 master status.tw
-			/*
-			if (
-				(Addr.ip[0] == 51 && Addr.ip[1] == 255 && Addr.ip[2] == 129 && Addr.ip[3] == 49) ||
-				(Addr.ip[0] == 51 && Addr.ip[1] == 89 && Addr.ip[2] == 37 && Addr.ip[3] == 201) ||
-				(Addr.ip[0] == 164 && Addr.ip[1] == 132 && Addr.ip[2] == 193 && Addr.ip[3] == 153)
-				)
-			{
-				dbg_msg("recv", "data from master srv");
-			}
-			*/
-			if (m_pMasterServer->IsMasterSrv(&Addr))
-			{
-				if (g_Config.m_SvVerboseNet > 1)
-					dbg_msg("recv", "MASTERSERVER dropped. ip=%d.%d.%d.%d token=%ud",
-					Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3],
-					*pResponseToken);
-			}
-			else
-			{
-				if (g_Config.m_SvVerboseNet)
-					dbg_msg("recv", "client dropped. ip=%d.%d.%d.%d token=%ud",
-					Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3],
-					*pResponseToken);
-			}
+			dbg_msg("recv", "data from master srv");
 		}
+		*/
+		filter_master(
+			m_pMasterServer->IsMasterSrv(&Addr), g_Config.m_SvVerboseNet,
+			"recv",
+			"dropped. ip=%d.%d.%d.%d token=%ud",
+			Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3],
+			*pResponseToken
+		);
 
 		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data) == 0)
 		{
@@ -361,6 +351,7 @@ CNetServer::CNetServer()
 {
 	// m_pMasterServer = 0;
 	// printf("CNetServer() mastersrv=%p netsrv=%p\n", m_pMasterServer, this);
+	m_TokenManager.m_pMasterServer = m_pMasterServer;
 }
 
 void CNetServer::BotInit(int BotID)

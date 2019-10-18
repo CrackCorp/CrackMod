@@ -111,6 +111,6 @@ MACRO_CONFIG_INT(DbgResizable, dbg_resizable, 0, 0, 0, CFGFLAG_CLIENT, "Enables 
 
 // CrackMod
 
-MACRO_CONFIG_INT(SvVerboseNet, sv_verbose_net, 2, 0, 2, CFGFLAG_SERVER, "verbose network output in logs")
+MACRO_CONFIG_INT(SvVerboseNet, sv_verbose_net, 2, 0, 2, CFGFLAG_SERVER, "0=off 1=filter masters 2=spammy+masters")
 
 #endif
