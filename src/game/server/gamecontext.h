@@ -141,6 +141,7 @@ public:
 
 	// network
 	void SendChat(int ChatterClientID, int Mode, int To, const char *pText);
+	void SendChatTarget(int To, const char *pText);
 	void SendBroadcast(const char *pText, int ClientID);
 	void SendEmoticon(int ClientID, int Emoticon);
 	void SendWeaponPickup(int ClientID, int Weapon);
@@ -196,6 +197,10 @@ public:
 	void OnCrackClientEnter(int ClientID);
 	int GetNextClientID();
 	void CreateNewDummys(int Number);
+	bool ChatCommand(const char *pMsg, int ClientID, int TargetID);
+	int CountPlayers();
+	int CountPlayers(bool IsAlive);
+	int CountSpectators();
 };
 
 inline int64 CmaskAll() { return -1; }

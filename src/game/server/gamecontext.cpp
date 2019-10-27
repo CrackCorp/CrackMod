@@ -189,6 +189,16 @@ void CGameContext::CreateSound(vec2 Pos, int Sound, int64 Mask)
 	}
 }
 
+void CGameContext::SendChatTarget(int To, const char *pText)
+{
+	CNetMsg_Sv_Chat Msg;
+	Msg.m_Mode = CHAT_ALL;
+	Msg.m_ClientID = -1;
+	Msg.m_TargetID = -1; // use this to get ugly whisper
+	Msg.m_pMessage = pText;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, To);
+}
+
 void CGameContext::SendChat(int ChatterClientID, int Mode, int To, const char *pText)
 {
 	char aBuf[256];
@@ -818,7 +828,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					Mode = CHAT_NONE;
 			}
 
-			if(Mode != CHAT_NONE)
+			if(!ChatCommand(pMsg->m_pMessage, ClientID, pMsg->m_Target) && Mode != CHAT_NONE)
 				SendChat(ClientID, Mode, pMsg->m_Target, pMsg->m_pMessage);
 		}
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
@@ -1677,6 +1687,75 @@ int CGameContext::GetNextClientID()
 		break;
 	}
 	return ClientID;
+}
+
+int CGameContext::CountPlayers()
+{
+	int c = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!m_apPlayers[i])
+			continue;
+		c++;
+	}
+	return c;
+}
+
+int CGameContext::CountPlayers(bool IsAlive)
+{
+	int c = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!m_apPlayers[i])
+			continue;
+		if (IsAlive && !m_apPlayers[i]->GetCharacter())
+			continue;
+		if (!IsAlive && m_apPlayers[i]->GetCharacter())
+			continue;
+		c++;
+	}
+	return c;
+}
+
+int CGameContext::CountSpectators()
+{
+	int c = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!m_apPlayers[i])
+			continue;
+		if(m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+			continue;
+		c++;
+	}
+	return c;
+}
+
+bool CGameContext::ChatCommand(const char *pMsg, int ClientID, int TargetID)
+{
+	if (pMsg[0] != '/')
+		return false;
+	char aCmd[128];
+	char aBuf[512];
+	str_format(aCmd, sizeof(aCmd), "%s", pMsg+1);
+	if (!str_comp_nocase(aCmd, "list"))
+	{
+		int Alive = CountPlayers(true);
+		int Dead = CountPlayers(false);
+		int Specs = CountSpectators();
+		int Total = CountPlayers();
+		str_format(aBuf, sizeof(aBuf), "Online: %d", Total);
+		SendChatTarget(ClientID, aBuf);
+		str_format(aBuf, sizeof(aBuf), "Alive: %d Dead: %d", Alive, Dead);
+		SendChatTarget(ClientID, aBuf);
+		str_format(aBuf, sizeof(aBuf), "Ingame: %d Spec: %d", Total-Specs, Specs);
+		SendChatTarget(ClientID, aBuf);
+	}
+	else
+	{
+		return false;
+	}
+	return true;
 }
 
 void CGameContext::CreateNewDummys(int Number)
