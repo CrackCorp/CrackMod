@@ -115,7 +115,7 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 		// check for a chunk
 		if(m_RecvUnpacker.FetchChunk(pChunk))
 		{
-			if(g_Config.m_SvVerboseNet)
+			if(g_Config.m_SvVerboseNet > 3)
 				dbg_msg("recv", "no chunk found");
 			return 1;
 		}
@@ -127,26 +127,25 @@ int CNetServer::Recv(CNetChunk *pChunk, TOKEN *pResponseToken)
 		if(Bytes <= 0)
 			break;
 
-		// 51.255.129.49 master3
-		// 51.89.37.201 master2
-		// 164.132.193.153 master status.tw
 		/*
-		if (
-			(Addr.ip[0] == 51 && Addr.ip[1] == 255 && Addr.ip[2] == 129 && Addr.ip[3] == 49) ||
-			(Addr.ip[0] == 51 && Addr.ip[1] == 89 && Addr.ip[2] == 37 && Addr.ip[3] == 201) ||
-			(Addr.ip[0] == 164 && Addr.ip[1] == 132 && Addr.ip[2] == 193 && Addr.ip[3] == 153)
-			)
-		{
-			dbg_msg("recv", "data from master srv");
-		}
-		*/
 		filter_master(
 			m_pMasterServer->IsMasterSrv(&Addr), g_Config.m_SvVerboseNet,
 			"recv",
-			"dropped. ip=%d.%d.%d.%d token=%ud",
+			"got data. ip=%d.%d.%d.%d token=%ud",
 			Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3],
 			*pResponseToken
 		);
+		*/
+		if (g_Config.m_SvVerboseNet > 3)
+		{
+			dbg_msg(
+				"recv",
+				"%sgot data. ip=%d.%d.%d.%d token=%ud",
+				m_pMasterServer->IsMasterSrv(&Addr) ? "\x1B[95m[MASTERSRV]\033[0m " : "",
+				Addr.ip[0], Addr.ip[1], Addr.ip[2], Addr.ip[3],
+				*pResponseToken
+			);
+		}
 
 		if(CNetBase::UnpackPacket(m_RecvUnpacker.m_aBuffer, Bytes, &m_RecvUnpacker.m_Data) == 0)
 		{

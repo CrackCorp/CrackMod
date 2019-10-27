@@ -774,6 +774,21 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		return;
 	}
 
+	if (g_Config.m_SvVerboseNet > 1)
+	{
+		char aAddrStr[NETADDR_MAXSTRSIZE] = {0};
+		Server()->GetClientAddr(ClientID, aAddrStr, sizeof(aAddrStr));
+		NETADDR Addr;
+		net_addr_from_str(&Addr, aAddrStr);
+		dbg_msg(
+			"on_message",
+			"gamecontext %sMsgID=%d ip=%s Ingame=%d",
+			"", // TODO: add mastersrv check here
+			/*m_pMasterServer->IsMasterSrv(&Addr) ? "\x1B[95m[MASTERSRV]\033[0m " : "",*/
+			MsgID, aAddrStr, Server()->ClientIngame(ClientID)
+		);
+	}
+
 	if(Server()->ClientIngame(ClientID))
 	{
 		if(MsgID == NETMSGTYPE_CL_SAY)

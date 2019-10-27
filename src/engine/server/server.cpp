@@ -835,7 +835,36 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 	Msg >>= 1;
 
 	if(Unpacker.Error())
+	{
+		if (g_Config.m_SvVerboseNet > 0)
+		{
+			NETADDR Addr = pPacket->m_Address;
+			char aAddr[128];
+			net_addr_str(&Addr, aAddr, sizeof(aAddr), 1);
+			dbg_msg(
+				"on_message",
+				"\x1B[31m[UNPACK_ERR]\033[0m server %sMsgID=%d Sys=%d ip=%s Ingame=%d",
+				"", // TODO: add mastersrv check here
+				/*m_pMasterServer->IsMasterSrv(&Addr) ? "\x1B[95m[MASTERSRV]\033[0m " : "",*/
+				Msg, Sys, aAddr, ClientIngame(ClientID)
+			);
+		}
 		return;
+	}
+
+	if (g_Config.m_SvVerboseNet > 1)
+	{
+		NETADDR Addr = pPacket->m_Address;
+		char aAddr[128];
+		net_addr_str(&Addr, aAddr, sizeof(aAddr), 1);
+		dbg_msg(
+			"on_message",
+			"server %sMsgID=%d Sys=%d ip=%s Ingame=%d",
+			"", // TODO: add mastersrv check here
+			/*m_pMasterServer->IsMasterSrv(&Addr) ? "\x1B[95m[MASTERSRV]\033[0m " : "",*/
+			Msg, Sys, aAddr, ClientIngame(ClientID)
+		);
+	}
 
 	if(Sys)
 	{
@@ -950,7 +979,22 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			// check for errors
 			if(Unpacker.Error() || Size/4 > MAX_INPUT_SIZE)
+			{
+				if (g_Config.m_SvVerboseNet > 0)
+				{
+					NETADDR Addr = pPacket->m_Address;
+					char aAddr[128];
+					net_addr_str(&Addr, aAddr, sizeof(aAddr), 1);
+					dbg_msg(
+						"netmsg_input",
+						"\x1B[31m[UNPACK_ERR]\033[0m server %sMsgID=%d Sys=%d ip=%s Ingame=%d Size=%d",
+						"", // TODO: add mastersrv check here
+						/*m_pMasterServer->IsMasterSrv(&Addr) ? "\x1B[95m[MASTERSRV]\033[0m " : "",*/
+						Msg, Sys, aAddr, ClientIngame(ClientID), Size
+					);
+				}
 				return;
+			}
 
 			if(m_aClients[ClientID].m_LastAckedSnapshot > 0)
 				m_aClients[ClientID].m_SnapRate = CClient::SNAPRATE_FULL;
@@ -1117,7 +1161,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else
 		{
-			if(g_Config.m_Debug)
+			if(g_Config.m_Debug || g_Config.m_SvVerboseNet)
 			{
 				char aHex[] = "0123456789ABCDEF";
 				char aBuf[512];

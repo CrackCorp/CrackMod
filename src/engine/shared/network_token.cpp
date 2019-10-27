@@ -79,7 +79,12 @@ int CNetTokenManager::ProcessMessage(const NETADDR *pAddr, const CNetPacketConst
 		else
 		{
 			if (g_Config.m_SvVerboseNet)
-				dbg_msg("process_msg", "abort: only NET_CTRLMSG_TOKEN is allowed connless");
+			{
+				dbg_msg(
+					"process_msg", "\x1B[31m[ERROR]\033[0m only NET_CTRLMSG_TOKEN is allowed connless FLAGS=%d CHKS=%d SIZ=%d",
+					pPacket->m_Flags, pPacket->m_NumChunks, pPacket->m_DataSize
+				);
+			}
 			// the only allowed not connless packet
 			// without token is NET_CTRLMSG_TOKEN
 			return 0;
