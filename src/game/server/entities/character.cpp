@@ -273,6 +273,15 @@ void CCharacter::FireWeapon()
 	if(!WillFire)
 		return;
 
+	if(g_Config.m_SvVerboseInputs)
+	{
+		dbg_msg(
+			"verbose-inp",
+			"prevfire=%d fire=%d presses=%d",
+			m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire, CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses
+		);
+	}
+
 	// check for ammo
 	if(!m_aWeapons[m_ActiveWeapon].m_Ammo)
 	{
