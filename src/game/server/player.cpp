@@ -5,6 +5,7 @@
 #include "entities/flag.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
+#include <engine/shared/config.h>
 #include "player.h"
 
 
@@ -41,11 +42,31 @@ CPlayer::~CPlayer()
 	m_pCharacter = 0;
 }
 
+void CPlayer::CrackTick()
+{
+	if(g_Config.m_SvVerboseInputs > 1)
+	{
+		dbg_msg(
+			"crack",
+			"player flags=%d", m_PlayerFlags
+		);
+		dbg_msg("crack", "flag admin=%d", m_PlayerFlags&PLAYERFLAG_ADMIN);
+		dbg_msg("crack", "flag chat=%d", m_PlayerFlags&PLAYERFLAG_CHATTING);
+		dbg_msg("crack", "flag scoreboard=%d", m_PlayerFlags&PLAYERFLAG_SCOREBOARD);
+		dbg_msg("crack", "flag ready=%d", m_PlayerFlags&PLAYERFLAG_READY);
+		dbg_msg("crack", "flag dead=%d", m_PlayerFlags&PLAYERFLAG_DEAD);
+		dbg_msg("crack", "flag watching=%d", m_PlayerFlags&PLAYERFLAG_WATCHING);
+		dbg_msg("crack", "flag bot=%d", m_PlayerFlags&PLAYERFLAG_BOT);
+		dbg_msg("crack", "flag aim=%d", m_PlayerFlags&PLAYERFLAG_AIM);
+	}
+}
+
 void CPlayer::Tick()
 {
 	if(!IsDummy() && !Server()->ClientIngame(m_ClientID))
 		return;
 
+	CrackTick();
 	Server()->SetClientScore(m_ClientID, m_Score);
 
 	// do latency stuff
@@ -225,7 +246,13 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 {
 	// skip the input if chat is active
 	if((m_PlayerFlags&PLAYERFLAG_CHATTING) && (NewInput->m_PlayerFlags&PLAYERFLAG_CHATTING))
+	{
+		if(g_Config.m_SvVerboseInputs)
+		{
+			dbg_msg("crack", "skip input player is chatting flags=%d", m_PlayerFlags);
+		}
 		return;
+	}
 
 	if(m_pCharacter)
 		m_pCharacter->OnPredictedInput(NewInput);

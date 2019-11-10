@@ -130,6 +130,10 @@ private:
 	int m_SpectatorID;
 	class CFlag *m_pSpecFlag;
 	bool m_ActiveSpecSwitch;
+
+	// CrackMod
+
+	void CrackTick();
 };
 
 #endif

@@ -111,7 +111,7 @@ MACRO_CONFIG_INT(DbgResizable, dbg_resizable, 0, 0, 0, CFGFLAG_CLIENT, "Enables 
 
 // CrackMod
 
-MACRO_CONFIG_INT(SvVerboseNet, sv_verbose_net, 2, 0, 4, CFGFLAG_SERVER, "0=off 1=no_masters 2=msgtype 3=masters 4=recv")
-MACRO_CONFIG_INT(SvVerboseInputs, sv_verbose_inputs, 1, 0, 1, CFGFLAG_SERVER, "0=off 1=show player fire inputs")
+MACRO_CONFIG_INT(SvVerboseNet, sv_verbose_net, 0, 0, 4, CFGFLAG_SERVER, "0=off 1=no_masters 2=msgtype 3=masters 4=recv")
+MACRO_CONFIG_INT(SvVerboseInputs, sv_verbose_inputs, 0, 0, 2, CFGFLAG_SERVER, "0=off 1=show player fire inputs 2=flags")
 
 #endif
