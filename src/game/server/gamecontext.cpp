@@ -969,6 +969,15 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				m_VoteType = VOTE_START_SPEC;
 				m_VoteClientID = SpectateID;
 			}
+			else
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf),
+					"'%d:%s' voted invalid vote type='%s'",
+					ClientID, Server()->ClientName(ClientID), pMsg->m_Type
+				);
+				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			}
 
 			if(m_VoteType != VOTE_UNKNOWN)
 			{
