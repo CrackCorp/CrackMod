@@ -57,7 +57,7 @@ void CPlayer::CrackTick()
 		dbg_msg("crack", "flag dead=%d", m_PlayerFlags&PLAYERFLAG_DEAD);
 		dbg_msg("crack", "flag watching=%d", m_PlayerFlags&PLAYERFLAG_WATCHING);
 		dbg_msg("crack", "flag bot=%d", m_PlayerFlags&PLAYERFLAG_BOT);
-		dbg_msg("crack", "flag aim=%d", m_PlayerFlags&PLAYERFLAG_AIM);
+		// dbg_msg("crack", "flag aim=%d", m_PlayerFlags&PLAYERFLAG_AIM);
 	}
 }
 
@@ -249,7 +249,7 @@ void CPlayer::OnPredictedInput(CNetObj_PlayerInput *NewInput)
 	{
 		if(g_Config.m_SvVerboseInputs)
 		{
-			dbg_msg("crack", "skip input player is chatting flags=%d", m_PlayerFlags);
+			dbg_msg("crack", "skip pred input player is chatting flags=%d", m_PlayerFlags);
 		}
 		return;
 	}
@@ -270,7 +270,13 @@ void CPlayer::OnDirectInput(CNetObj_PlayerInput *NewInput)
 	{
 		// skip the input if chat is active
 		if(m_PlayerFlags&PLAYERFLAG_CHATTING)
+		{
+			if(g_Config.m_SvVerboseInputs)
+			{
+				dbg_msg("crack", "skip input player is chatting flags=%d", m_PlayerFlags);
+			}
 			return;
+		}
 
 		// reset input
 		if(m_pCharacter)
