@@ -5,8 +5,6 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <engine/external/md5/md5.h>
-
 #include <engine/shared/config.h>
 
 #include <engine/server/register.h>
