@@ -2536,9 +2536,9 @@ unsigned bytes_be_to_uint(const unsigned char *bytes)
 void filter_master(int master, int verbose, const char *sys, const char *fmt, ...)
 {
 	// printf("is master %d\n", master);
+	va_list args;
 	if (master && verbose < 2)
 		return;
-	va_list args;
 	char str[1024*4];
 	char *msg;
 	int i, len;

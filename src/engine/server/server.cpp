@@ -1063,8 +1063,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 				else
 				{
-					str_format(aVersion, sizeof(aVersion), pVersion+2);
-					str_format(aTimeoutCode, sizeof(aTimeoutCode), pCode+5);
+					str_copy(aVersion, pVersion + 2, sizeof(aVersion));
+					str_copy(aTimeoutCode, pCode + 5, sizeof(aTimeoutCode));
 					str_format(aBuf, sizeof(aBuf), "ZillyWoods client v='%s' code='%s'", aVersion, aTimeoutCode);
 					Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aBuf);
 				}
