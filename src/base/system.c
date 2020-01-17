@@ -2537,13 +2537,13 @@ void filter_master(int master, int verbose, const char *sys, const char *fmt, ..
 {
 	// printf("is master %d\n", master);
 	va_list args;
-	if (master && verbose < 2)
-		return;
 	char str[1024*4];
 	char *msg;
 	int i, len;
-
 	char timestr[80];
+	if (master && verbose < 2)
+		return;
+
 	str_timestamp_format(timestr, sizeof(timestr), FORMAT_SPACE);
 
 	str_format(str, sizeof(str), "[%s][%s]: %s", timestr, sys, master == 1 ? "\x1B[95m[MASTERSRV]\033[0m " : "");
