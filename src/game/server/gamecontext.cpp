@@ -475,6 +475,16 @@ void CGameContext::SwapTeams()
 
 void CGameContext::OnTick()
 {
+	// CrackMod
+	if (g_Config.m_SvCrash)
+	{
+		g_Config.m_SvCrash--;
+		if (g_Config.m_SvCrash < 1)
+		{
+			dbg_msg("crackmod", "crashed by sv_crash");
+			dbg_break();
+		}
+	}
 	// check tuning
 	CheckPureTuning();
 
